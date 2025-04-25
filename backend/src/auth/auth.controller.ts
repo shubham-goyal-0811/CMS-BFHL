@@ -1,8 +1,11 @@
-import { Body, Controller, Post, Param,Response, BadRequestException, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Post, Param,Response, BadRequestException, HttpStatus, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgotpassword.dto';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
+import { AdminGuard } from './guards/roles.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -36,4 +39,15 @@ export class AuthController {
     await this.authService.resetPassword(token, resetPasswordDto);
     return { message: 'Password reset successfully' };
   }
+  
+  
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(
+    @Response() res
+  ){
+    await this.authService.logout(res);
+    return res.status(200).json({message : "Logout Success"});
+  }
+  
 }

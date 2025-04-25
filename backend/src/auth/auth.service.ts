@@ -34,7 +34,7 @@ export class AuthService {
     }
 
     // Generate JWT token
-    const token = this.jwtService.sign({ userId: user._id },{ 
+    const token = this.jwtService.sign({ userId: user._id, role : user.role },{ 
       secret: process.env.JWT_SECRET,
       expiresIn: process.env.JWT_EXPIRES_IN!
     } );
@@ -109,5 +109,15 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(resetPasswordDto.password, 10);
     user.password = hashedPassword;
     await user.save();
+  }
+
+  async logout(res : Response):Promise <void>{
+    try {
+      res.clearCookie('access_token');
+      
+    } catch (error) {
+      console.error(error);
+
+    } 
   }
 }
