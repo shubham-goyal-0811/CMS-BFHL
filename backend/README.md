@@ -1,98 +1,163 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📦 CMS Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A **Node.js + NestJS** based backend server for managing a simple **CMS (Content Management System)** — handles users, products, carts, and orders.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## ⚙️ Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Node.js** (Runtime)
+- **NestJS** (Backend Framework)
+- **MongoDB** (Database)
+- **Mongoose** (ORM for MongoDB)
+- **TypeScript** (Language)
 
-## Project setup
+Make sure you have **MongoDB** running locally or provide your **MongoDB URI** inside `.env`.
 
-```bash
-$ npm install
+---
+
+## 🗂️ Project Structure
+
+```
+src/
+├── cart/
+│   └── cart.module.ts, cart.service.ts, cart.schema.ts
+├── order/
+│   └── order.module.ts, order.service.ts, order.schema.ts
+├── product/
+│   └── product.module.ts, product.service.ts, product.schema.ts
+├── user/
+│   └── user.module.ts, user.service.ts, user.schema.ts
+├── app.module.ts
+└── main.ts
 ```
 
-## Compile and run the project
+Each folder (cart, order, product, user) contains its:
+- Module
+- Service
+- Controller (if needed)
+- Mongoose Schema
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+## 🔥 Core Features
 
-# production mode
-$ npm run start:prod
+### 1. **Users**
+- Register and store user data.
+- After placing an order, the **user document** is updated with the placed **order ID**.
+
+### 2. **Products**
+- Products can be listed, created, updated, and deleted.
+- Each product has properties like `title`, `description`, `price`, etc.
+
+### 3. **Cart**
+- Users can add multiple products to their cart.
+- A cart is linked to a user and contains an array of product references.
+
+### 4. **Orders**
+- Orders are created from the cart contents.
+- Order has:
+  - **userId** reference (who placed the order)
+  - **products** array
+  - **status** (example: `PENDING`, `SHIPPED`, `DELIVERED`)
+- Order Status can be updated.
+
+---
+
+## 📜 Important Modules Explained
+
+### 🛒 Cart Module
+- Cart schema references multiple **Product** IDs.
+- **CartService** has methods to create and manage cart items.
+
+### 🛍️ Order Module
+- Order schema has a **status** enum (example: `PENDING`, `CANCELLED`, etc).
+- **OrderService** creates an order from a user's cart.
+- Order status can be updated (only to valid statuses).
+
+---
+## 📌 How Dependency Injection Works (NestJS Specific)
+
+- All **Models** (User, Product, Cart, Order) are injected using `@InjectModel`.
+- `MongooseModule.forFeature([...])` is used inside each module.
+- When **cross-module model access** is needed (e.g., Order module needs User model),  
+  ➔ **Import that module** (`UserModule`) inside your target module (`OrderModule`).
+
+Example:
+
+```typescript
+@Module({
+  imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+  ],
+  exports: [
+    MongooseModule
+  ]
+})
+export class UserModule {}
 ```
 
-## Run tests
+And in `OrderModule`:
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```typescript
+@Module({
+  imports: [
+    UserModule
+  ],
+})
+export class OrderModule {}
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 🛠️ Common Errors & Solutions
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Error | Cause | Solution |
+|:---|:---|:---|
+| `Property 'status' does not exist on type 'Query'` | `.findById()` needs `await` | Add `await this.model.findById(id)` |
+| `UnknownDependenciesException` | Missing Module import | Import the module that exports the required Model |
+| `Type 'string' is not assignable to type 'Status'` | Enum mismatch | Validate incoming status properly and cast if necessary |
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+---
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📈 Key Flows
 
-## Resources
+### ➡️ Place an Order
 
-Check out a few resources that may come in handy when working with NestJS:
+1. Cart is fetched for the user.
+2. New Order document is created with products from cart.
+3. Order status set to `PENDING`.
+4. Order ID is **pushed** into the User's `orders` array.
+5. Cart is cleared.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+### ➡️ Update Order Status
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- Validate incoming status is part of `Status` enum.
+- Update Order's `status` field.
+- Save changes to MongoDB.
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🌐 API Routes (Sample)
 
-## License
+| Method | Route | Description |
+|:---|:---|:---|
+| POST | `/cart/add` | Add a product to cart |
+| POST | `/order/place` | Place an order from cart |
+| PATCH | `/order/:id` | Update status of an order |
+| GET | `/product/list` | List all products |
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## 📢 Notes
+
+- Always validate inputs (DTOs recommended).
+- Status changes are limited to pre-defined enum values only.
+- Proper MongoDB indexes (like userId, productId) can improve query speed.
+
+---
+
+# 🚀 Happy Coding!  
+*Made with ❤️ by Shubham using NestJS.*
