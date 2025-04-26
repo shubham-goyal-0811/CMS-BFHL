@@ -11,5 +11,9 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [AuthModule,MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }])],
   controllers: [ProductsController],
   providers: [ProductsService],
+  exports : [
+    ProductsService,
+    MongooseModule
+  ]
 })
 export class ProductsModule {}

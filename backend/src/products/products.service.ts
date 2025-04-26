@@ -46,7 +46,7 @@ export class ProductsService {
       const result = await cloudinary.uploader.upload(filePath, {
         folder: 'products',
       });
-      console.log('file Upload success')
+      
       return result.secure_url;
     } catch (error) {
       console.log(error);

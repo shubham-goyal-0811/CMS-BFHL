@@ -1,13 +1,19 @@
-import { Controller, Post, Body, Res, HttpStatus, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus, BadRequestException, Get, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Response } from 'express';  // Import Response from express
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // User registration (send OTP)
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getUser(@Req() req){
+    return this.usersService.getUser(req.user.userId);
+  }
+  
   @Post('register')
   async createUser(@Body() createUserDto: CreateUserDto): Promise<{ token: string }> {
     const { email, mobileNumber } = createUserDto;

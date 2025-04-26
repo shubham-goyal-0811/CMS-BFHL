@@ -123,6 +123,10 @@ export class UsersService {
     }
   }
 
+  async getUser(id : string){
+    return await this.userModel.findById(id);
+  }
+
   async findByEmailOrMobile(email: string, mobileNumber: string): Promise<User | null> {
     return this.userModel.findOne({
       $or: [{ email }, { mobileNumber }]
